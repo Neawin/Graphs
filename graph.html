@@ -1,0 +1,1131 @@
+<html>
+  <head>
+    <title>Grafy</title>
+    <script src="../src/sigma.core.js"></script>
+    <script src="../src/conrad.js"></script>
+    <script src="../src/utils/sigma.utils.js"></script>
+    <script src="../src/utils/sigma.polyfills.js"></script>
+    <script src="../src/sigma.settings.js"></script>
+    <script src="../src/classes/sigma.classes.dispatcher.js"></script>
+    <script src="../src/classes/sigma.classes.configurable.js"></script>
+    <script src="../src/classes/sigma.classes.graph.js"></script>
+    <script src="../src/classes/sigma.classes.camera.js"></script>
+    <script src="../src/classes/sigma.classes.quad.js"></script>
+    <script src="../src/classes/sigma.classes.edgequad.js"></script>
+    <script src="../src/captors/sigma.captors.mouse.js"></script>
+    <script src="../src/captors/sigma.captors.touch.js"></script>
+    <script src="../src/renderers/sigma.renderers.canvas.js"></script>
+    <script src="../src/renderers/sigma.renderers.webgl.js"></script>
+    <script src="../src/renderers/sigma.renderers.svg.js"></script>
+    <script src="../src/renderers/sigma.renderers.def.js"></script>
+    <script src="../build/plugins/sigma.renderers.edgeLabels.min.js"></script>
+    <script src="../src/renderers/webgl/sigma.webgl.nodes.def.js"></script>
+    <script src="../src/renderers/webgl/sigma.webgl.nodes.fast.js"></script>
+    <script src="../src/renderers/webgl/sigma.webgl.edges.def.js"></script>
+    <script src="../src/renderers/webgl/sigma.webgl.edges.fast.js"></script>
+    <script src="../src/renderers/webgl/sigma.webgl.edges.arrow.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.labels.def.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.hovers.def.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.nodes.def.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edges.def.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edges.curve.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edges.arrow.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edges.curvedArrow.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edgehovers.def.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edgehovers.curve.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edgehovers.arrow.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.edgehovers.curvedArrow.js"></script>
+    <script src="../src/renderers/canvas/sigma.canvas.extremities.def.js"></script>
+    <script src="../src/renderers/svg/sigma.svg.utils.js"></script>
+    <script src="../src/renderers/svg/sigma.svg.nodes.def.js"></script>
+    <script src="../src/renderers/svg/sigma.svg.edges.def.js"></script>
+    <script src="../src/renderers/svg/sigma.svg.edges.curve.js"></script>
+    <script src="../src/renderers/svg/sigma.svg.labels.def.js"></script>
+    <script src="../src/renderers/svg/sigma.svg.hovers.def.js"></script>
+    <script src="../src/middlewares/sigma.middlewares.rescale.js"></script>
+    <script src="../src/middlewares/sigma.middlewares.copy.js"></script>
+    <script src="../src/misc/sigma.misc.animation.js"></script>
+    <script src="../src/misc/sigma.misc.bindEvents.js"></script>
+    <script src="../src/misc/sigma.misc.bindDOMEvents.js"></script>
+    <script src="../src/misc/sigma.misc.drawHovers.js"></script>
+
+    <script src="../plugins/sigma.renderers.parallelEdges/utils.js"></script>
+    <script src="../plugins/sigma.renderers.parallelEdges/sigma.canvas.edges.curve.js"></script>
+    <script src="../plugins/sigma.renderers.parallelEdges/sigma.canvas.edges.curvedArrow.js"></script>
+    <script src="../plugins/sigma.renderers.parallelEdges/sigma.canvas.edgehovers.curve.js"></script>
+    <script src="../plugins/sigma.renderers.parallelEdges/sigma.canvas.edgehovers.curvedArrow.js"></script>
+    <script src="../plugins/sigma.renderers.edgeLabels/settings.js"></script>
+    <script src="../plugins/sigma.renderers.edgeLabels/sigma.canvas.edges.labels.def.js"></script>
+    <script src="../plugins/sigma.renderers.edgeLabels/sigma.canvas.edges.labels.curve.js"></script>
+    <script src="../plugins/sigma.renderers.edgeLabels/sigma.canvas.edges.labels.curvedArrow.js"></script>
+    <style>
+      html {
+        height: 100%;
+      }
+      body {
+        height: 100%;
+      }
+      #sigma-container {
+        width: 100%;
+        height: 100%;
+        background-color: #e1e1e1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="input">
+      <textarea
+        name="m1"
+        id="m1"
+        cols="30"
+        rows="10"
+        placeholder="Macierz sasiedztwa"
+      >
+[0,0,0,0,1,1];[0,0,1,1,1,1];[0,1,0,1,1,1];[0,1,1,0,0,0];[1,1,1,0,0,1];[1,1,1,0,1,0]</textarea
+      >
+      <button onclick="MatrixS()">Rysuj</button>
+      <textarea
+        name="m2"
+        id="m2"
+        cols="30"
+        rows="10"
+        placeholder="Macierz incydencji"
+      >
+[1,0,0,1,0,0];[1,1,0,0,1,1];[0,1,1,0,0,0];[0,0,1,1,1,1]</textarea
+      >
+      <button onclick="MatrixI()">Rysuj</button>
+      <textarea
+        name="m3"
+        id="m3"
+        cols="30"
+        rows="10"
+        placeholder="Lista sasiedztwa"
+      >
+0:1,2,3;1:0,1,2;2:0,1;3:0,3;4:5,6;5:4;6:4</textarea
+      >
+      <button onclick="MacS()">Rysuj</button>
+    </div>
+    <div id="sigma-container"></div>
+    <script>
+      var s = new sigma();
+
+      function MatrixS() {
+        var i,
+          g = {
+            nodes: [],
+            edges: [],
+          };
+        var m1str = document.querySelector("#m1").value;
+        var res = m1str.split(";");
+        var table = [res.length];
+        res.forEach((e, i) => {
+          var patt1 = /[0-9]/g;
+          var result = e.match(patt1);
+          var tab = [];
+          for (let j = 0; j < result.length; j++) {
+            tab.push(parseInt(result[j]));
+          }
+          table[i] = tab;
+        });
+
+        // console.log(table);
+        var edgeNum = 0;
+        var z = 0;
+        table.forEach((e, i) => {
+          for (j = i; j < e.length; j++) {
+            if (e[j] != 0) {
+              if (e[j] > 1) {
+                for (let h = 0; h < e[j]; h++) {
+                  g.edges.push({
+                    id: "e" + z,
+                    source: "n" + i,
+                    target: "n" + j,
+                    size: 1,
+                    label: "E" + z,
+                    type: "curve",
+                    count: z,
+                  });
+                  z++;
+                }
+              } else {
+                g.edges.push({
+                  id: "e" + z,
+                  source: "n" + i,
+                  target: "n" + j,
+                  size: 1,
+                  label: "E" + z,
+                  type: "curve",
+                  count: z,
+                });
+                z++;
+              }
+            }
+
+            edgeNum += e[j];
+          }
+        });
+
+        s.kill();
+        var N = table.length;
+        var E = edgeNum;
+        // Generate a random graph:
+        for (i = 0; i < N; i++)
+          g.nodes.push({
+            id: "n" + i,
+            label: "W" + i,
+            x: Math.random(),
+            y: Math.random(),
+            size: 1,
+            color: "#666",
+          });
+
+        s = new sigma({
+          graph: g,
+          renderer: {
+            container: "sigma-container",
+            type: "canvas",
+          },
+          settings: {
+            edgeLabelSize: "proportional",
+            defaultLabelSize: 15,
+            defaultEdgeLabelSize: 15,
+          },
+        });
+        var visited = [];
+        var stos = [];
+        spj = false;
+        // SPOJNOSC
+        var dict = new Object();
+        s.graph.nodes().forEach((element) => {
+          dict[element.id] = [];
+        });
+        s.graph.edges().forEach((element) => {
+          dict[element.source].push(element.target);
+          dict[element.target].push(element.source);
+        });
+        visited.push(s.graph.nodes()[0].id);
+
+        spoj(s.graph.nodes()[0].id);
+        function spoj(w) {
+          if (dict[w].length !== 0) {
+            var arrS = dict[w].filter(function (obj) {
+              return visited.indexOf(obj) == -1;
+            });
+            arr3 = arrS.filter(function (obj) {
+              return stos.indexOf(obj) == -1;
+            });
+            if (arr3.length !== 0) {
+              for (let i = 0; i < s.graph.edges().length; i++) {
+                if (
+                  s.graph.edges()[i].source === w &&
+                  s.graph.edges()[i].target === arr3[0]
+                ) {
+                  const index = dict[w].indexOf(arr3[0]);
+                  if (index > -1) {
+                    dict[w].splice(index, 1);
+                  }
+
+                  const indexx = dict[arr3[0]].indexOf(w);
+                  if (index > -1) {
+                    dict[arr3[0]].splice(indexx, 1);
+                  }
+                  visited.push(arr3[0]);
+
+                  s.graph.dropEdge(s.graph.edges()[i].id);
+
+                  spoj(arr3[0]);
+                } else if (
+                  s.graph.edges()[i].source === arr3[0] &&
+                  s.graph.edges()[i].target === w
+                ) {
+                  const index = dict[w].indexOf(arr3[0]);
+                  if (index > -1) {
+                    dict[w].splice(index, 1);
+                  }
+                  const indexx = dict[arr3[0]].indexOf(w);
+                  if (index > -1) {
+                    dict[arr3[0]].splice(indexx, 1);
+                  }
+                  visited.push(arr3[0]);
+
+                  s.graph.dropEdge(s.graph.edges()[i].id);
+
+                  spoj(arr3[0]);
+                }
+              }
+            } else {
+              var popped = visited.pop();
+              if (popped !== undefined) {
+                stos.push(popped);
+                spoj(popped);
+              }
+            }
+          } else {
+            var popped = visited.pop();
+            if (popped !== undefined) {
+              stos.push(popped);
+              spoj(popped);
+            }
+          }
+        }
+        if (stos.length === s.graph.nodes().length) spj = true;
+
+        // HAMILTON
+        s.kill();
+        visited = [];
+        stos = [];
+
+        s = new sigma({
+          graph: g,
+          renderer: {
+            container: "sigma-container",
+            type: "canvas",
+          },
+          settings: {
+            edgeLabelSize: "proportional",
+            defaultLabelSize: 15,
+            defaultEdgeLabelSize: 15,
+          },
+        });
+
+        if (spj) {
+          var reku = [];
+          var dict = new Object();
+          s.graph.nodes().forEach((element) => {
+            dict[element.id] = [];
+          });
+          s.graph.edges().forEach((element) => {
+            dict[element.source].push(element.target);
+            dict[element.target].push(element.source);
+          });
+          visited.push(s.graph.nodes()[0].id);
+          reku = dict[s.graph.nodes()[0].id];
+          console.log(reku);
+          ham(s.graph.nodes()[0].id);
+
+          function ham(w) {}
+        }
+        // EULER
+        s.kill();
+        visited = [];
+        stos = [];
+        dict = {};
+        s = new sigma({
+          graph: g,
+          renderer: {
+            container: "sigma-container",
+            type: "canvas",
+          },
+          settings: {
+            edgeLabelSize: "proportional",
+            defaultLabelSize: 15,
+            defaultEdgeLabelSize: 15,
+          },
+        });
+        if (spj) {
+          var eul = true;
+          s.graph.nodes().forEach((e) => {
+            if (s.graph.degree(e.id) % 2 !== 0) {
+              eul = false;
+            }
+          });
+          if (eul === false) {
+            console.log("Nie ma cyklu Eulera");
+          } else {
+            var dict = new Object();
+            s.graph.nodes().forEach((element) => {
+              dict[element.id] = [];
+            });
+            s.graph.edges().forEach((element) => {
+              dict[element.source].push(element.target);
+              dict[element.target].push(element.source);
+            });
+            visited.push(s.graph.nodes()[0].id);
+            dfs(s.graph.nodes()[0].id);
+            function dfs(w) {
+              if (dict[w].length !== 0) {
+                var arr3 = dict[w].filter(function (obj) {
+                  return visited.indexOf(obj) == -1;
+                });
+
+                if (arr3.length !== 0) {
+                  for (let i = 0; i < s.graph.edges().length; i++) {
+                    var arrnum = [];
+                    arr3.forEach((element) => {
+                      arrnum.push(element.slice(1, 2));
+                    });
+                    arrnum.sort(function (a, b) {
+                      return a - b;
+                    });
+                    most = true;
+                    while (most) {
+                      for (let i = 0; i < arrnum.length; i++) {
+                        if (dict[`n${arrnum[i]}`].length > 1) {
+                          most = false;
+                          var mini = `n${arrnum[i]}`;
+                          break;
+                        } else {
+                          var mini = `n${arrnum[i]}`;
+                        }
+                      }
+                      most = false;
+                    }
+
+                    if (
+                      s.graph.edges()[i].source === w &&
+                      s.graph.edges()[i].target == mini
+                    ) {
+                      const index = dict[w].indexOf(mini);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[mini].indexOf(w);
+                      if (index > -1) {
+                        dict[mini].splice(indexx, 1);
+                      }
+                      visited.push(mini);
+
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+
+                      dfs(mini);
+                    } else if (
+                      s.graph.edges()[i].source === mini &&
+                      s.graph.edges()[i].target === w
+                    ) {
+                      const index = dict[w].indexOf(mini);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+                      const indexx = dict[mini].indexOf(w);
+                      if (index > -1) {
+                        dict[mini].splice(indexx, 1);
+                      }
+                      visited.push(mini);
+
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+
+                      dfs(mini);
+                    }
+                  }
+                } else {
+                  var arrnum = [];
+                  dict[w].forEach((element) => {
+                    arrnum.push(element.slice(1, 2));
+                  });
+                  arrnum.sort(function (a, b) {
+                    return a - b;
+                  });
+                  most = true;
+                  while (most) {
+                    for (let i = 0; i < arrnum.length; i++) {
+                      if (dict[`n${arrnum[i]}`].length > 1) {
+                        most = false;
+                        var minz = `n${arrnum[i]}`;
+                        break;
+                      } else {
+                        var minz = `n${arrnum[i]}`;
+                      }
+                    }
+                    most = false;
+                  }
+
+                  for (let i = 0; i < s.graph.edges().length; i++) {
+                    if (
+                      s.graph.edges()[i].source === w &&
+                      s.graph.edges()[i].target === minz
+                    ) {
+                      const index = dict[w].indexOf(minz);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[minz].indexOf(w);
+                      if (index > -1) {
+                        dict[minz].splice(indexx, 1);
+                      }
+                      pops = minz;
+                      visited.push(minz);
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+                      dfs(pops);
+                    } else if (
+                      s.graph.edges()[i].source === minz &&
+                      s.graph.edges()[i].target === w
+                    ) {
+                      const index = dict[w].indexOf(minz);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[minz].indexOf(w);
+                      if (index > -1) {
+                        dict[minz].splice(indexx, 1);
+                      }
+                      pops = minz;
+                      visited.push(minz);
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+                      dfs(pops);
+                    }
+                  }
+                }
+              } else {
+                var popped = visited.pop();
+                if (popped !== undefined) {
+                  stos.push(popped);
+                  dfs(popped);
+                } else {
+                  console.log(stos);
+                }
+              }
+            }
+          }
+          console.log("cykl Eulera " + stos);
+        } else {
+          console.log("Graf nie jest spojny");
+        }
+      }
+
+      function MatrixI() {
+        var i,
+          g = {
+            nodes: [],
+            edges: [],
+          };
+        var m2str = document.querySelector("#m2").value;
+        var res = m2str.split(";");
+        var table = [res.length];
+        res.forEach((e, i) => {
+          var patt1 = /[0-9]/g;
+          var result = e.match(patt1);
+          var tab = [];
+          for (let j = 0; j < result.length; j++) {
+            tab.push(parseInt(result[j]));
+          }
+          table[i] = tab;
+        });
+
+        var temp,
+          z = 0;
+        for (let i = 0; i < table[0].length; i++) {
+          temp = undefined;
+          for (let j = 0; j < table.length; j++) {
+            if (table[j][i] === 1) {
+              if (temp !== j && temp !== undefined) {
+                g.edges.push({
+                  id: "e" + z,
+                  source: "n" + temp,
+                  target: "n" + j,
+                  size: 1,
+                  label: "E" + z,
+                  type: "curve",
+                  count: z,
+                });
+                z++;
+              } else {
+                temp = j;
+              }
+            }
+          }
+        }
+
+        s.kill();
+
+        var N = table.length;
+        var E = table[0].length;
+        // Generate a random graph:
+        for (i = 0; i < N; i++)
+          g.nodes.push({
+            id: "n" + i,
+            label: "W" + i,
+            x: Math.random(),
+            y: Math.random(),
+            size: 1,
+            color: "#666",
+          });
+
+        s = new sigma({
+          graph: g,
+          renderer: {
+            container: "sigma-container",
+            type: "canvas",
+          },
+          settings: {
+            edgeLabelSize: "proportional",
+            defaultLabelSize: 15,
+            defaultEdgeLabelSize: 15,
+          },
+        });
+        var visited = [];
+        var stos = [];
+        spj = false;
+        // SPOJNOSC
+        var dict = new Object();
+        s.graph.nodes().forEach((element) => {
+          dict[element.id] = [];
+        });
+        s.graph.edges().forEach((element) => {
+          dict[element.source].push(element.target);
+          dict[element.target].push(element.source);
+        });
+        visited.push(s.graph.nodes()[0].id);
+        spoj(s.graph.nodes()[0].id);
+        function spoj(w) {
+          if (dict[w].length !== 0) {
+            var arrS = dict[w].filter(function (obj) {
+              return visited.indexOf(obj) == -1;
+            });
+            arr3 = arrS.filter(function (obj) {
+              return stos.indexOf(obj) == -1;
+            });
+            if (arr3.length !== 0) {
+              for (let i = 0; i < s.graph.edges().length; i++) {
+                if (
+                  s.graph.edges()[i].source === w &&
+                  s.graph.edges()[i].target === arr3[0]
+                ) {
+                  const index = dict[w].indexOf(arr3[0]);
+                  if (index > -1) {
+                    dict[w].splice(index, 1);
+                  }
+
+                  const indexx = dict[arr3[0]].indexOf(w);
+                  if (index > -1) {
+                    dict[arr3[0]].splice(indexx, 1);
+                  }
+                  visited.push(arr3[0]);
+
+                  s.graph.dropEdge(s.graph.edges()[i].id);
+
+                  spoj(arr3[0]);
+                } else if (
+                  s.graph.edges()[i].source === arr3[0] &&
+                  s.graph.edges()[i].target === w
+                ) {
+                  const index = dict[w].indexOf(arr3[0]);
+                  if (index > -1) {
+                    dict[w].splice(index, 1);
+                  }
+                  const indexx = dict[arr3[0]].indexOf(w);
+                  if (index > -1) {
+                    dict[arr3[0]].splice(indexx, 1);
+                  }
+                  visited.push(arr3[0]);
+
+                  s.graph.dropEdge(s.graph.edges()[i].id);
+
+                  spoj(arr3[0]);
+                }
+              }
+            } else {
+              var popped = visited.pop();
+              if (popped !== undefined) {
+                stos.push(popped);
+                spoj(popped);
+              }
+            }
+          } else {
+            var popped = visited.pop();
+            if (popped !== undefined) {
+              stos.push(popped);
+              spoj(popped);
+            }
+          }
+        }
+        if (stos.length === s.graph.nodes().length) spj = true;
+
+        // EULER
+        s.kill();
+        visited = [];
+        stos = [];
+        dict = {};
+        s = new sigma({
+          graph: g,
+          renderer: {
+            container: "sigma-container",
+            type: "canvas",
+          },
+          settings: {
+            edgeLabelSize: "proportional",
+            defaultLabelSize: 15,
+            defaultEdgeLabelSize: 15,
+          },
+        });
+        if (spj) {
+          var eul = true;
+          s.graph.nodes().forEach((e) => {
+            if (s.graph.degree(e.id) % 2 !== 0) {
+              eul = false;
+            }
+          });
+          if (eul === false) {
+            console.log("Nie ma cyklu Eulera");
+          } else {
+            var dict = new Object();
+            s.graph.nodes().forEach((element) => {
+              dict[element.id] = [];
+            });
+            s.graph.edges().forEach((element) => {
+              dict[element.source].push(element.target);
+              dict[element.target].push(element.source);
+            });
+            visited.push(s.graph.nodes()[0].id);
+            dfs(s.graph.nodes()[0].id);
+            function dfs(w) {
+              if (dict[w].length !== 0) {
+                var arr3 = dict[w].filter(function (obj) {
+                  return visited.indexOf(obj) == -1;
+                });
+
+                if (arr3.length !== 0) {
+                  for (let i = 0; i < s.graph.edges().length; i++) {
+                    var arrnum = [];
+                    arr3.forEach((element) => {
+                      arrnum.push(element.slice(1, 2));
+                    });
+                    arrnum.sort(function (a, b) {
+                      return a - b;
+                    });
+                    most = true;
+                    while (most) {
+                      for (let i = 0; i < arrnum.length; i++) {
+                        if (dict[`n${arrnum[i]}`].length > 1) {
+                          most = false;
+                          var mini = `n${arrnum[i]}`;
+                          break;
+                        } else {
+                          var mini = `n${arrnum[i]}`;
+                        }
+                      }
+                      most = false;
+                    }
+
+                    if (
+                      s.graph.edges()[i].source === w &&
+                      s.graph.edges()[i].target == mini
+                    ) {
+                      const index = dict[w].indexOf(mini);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[mini].indexOf(w);
+                      if (index > -1) {
+                        dict[mini].splice(indexx, 1);
+                      }
+                      visited.push(mini);
+
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+
+                      dfs(mini);
+                    } else if (
+                      s.graph.edges()[i].source === mini &&
+                      s.graph.edges()[i].target === w
+                    ) {
+                      const index = dict[w].indexOf(mini);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+                      const indexx = dict[mini].indexOf(w);
+                      if (index > -1) {
+                        dict[mini].splice(indexx, 1);
+                      }
+                      visited.push(mini);
+
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+
+                      dfs(mini);
+                    }
+                  }
+                } else {
+                  var arrnum = [];
+                  dict[w].forEach((element) => {
+                    arrnum.push(element.slice(1, 2));
+                  });
+                  arrnum.sort(function (a, b) {
+                    return a - b;
+                  });
+                  most = true;
+                  while (most) {
+                    for (let i = 0; i < arrnum.length; i++) {
+                      if (dict[`n${arrnum[i]}`].length > 1) {
+                        most = false;
+                        var minz = `n${arrnum[i]}`;
+                        break;
+                      } else {
+                        var minz = `n${arrnum[i]}`;
+                      }
+                    }
+                    most = false;
+                  }
+
+                  for (let i = 0; i < s.graph.edges().length; i++) {
+                    if (
+                      s.graph.edges()[i].source === w &&
+                      s.graph.edges()[i].target === minz
+                    ) {
+                      const index = dict[w].indexOf(minz);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[minz].indexOf(w);
+                      if (index > -1) {
+                        dict[minz].splice(indexx, 1);
+                      }
+                      pops = minz;
+                      visited.push(minz);
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+                      dfs(pops);
+                    } else if (
+                      s.graph.edges()[i].source === minz &&
+                      s.graph.edges()[i].target === w
+                    ) {
+                      const index = dict[w].indexOf(minz);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[minz].indexOf(w);
+                      if (index > -1) {
+                        dict[minz].splice(indexx, 1);
+                      }
+                      pops = minz;
+                      visited.push(minz);
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+                      dfs(pops);
+                    }
+                  }
+                }
+              } else {
+                var popped = visited.pop();
+                if (popped !== undefined) {
+                  stos.push(popped);
+                  dfs(popped);
+                } else {
+                  console.log(stos);
+                }
+              }
+            }
+          }
+          console.log("cykl Eulera " + stos);
+        } else {
+          console.log("Graf nie jest spojny");
+        }
+      }
+      function MacS() {
+        var i,
+          g = {
+            nodes: [],
+            edges: [],
+          };
+        var z = 0;
+        var m3str = document.querySelector("#m3").value;
+        var res = m3str.split(";");
+        var table = [];
+        res.forEach((e) => {
+          table.push(e.split(":"));
+        });
+        for (let i = 0; i < table.length; i++) {
+          var res1 = table[i][1].split(",");
+
+          for (let j = 0; j < res1.length; j++) {
+            if (table[i][0] <= res1[j]) {
+              g.edges.push({
+                id: "e" + z,
+                source: "n" + table[i][0],
+                target: "n" + res1[j],
+                size: 1,
+                label: "E" + z,
+                type: "curve",
+                count: z,
+              });
+              z++;
+            }
+          }
+        }
+        s.kill();
+        var N = res.length;
+        var E = 0;
+
+        for (i = 0; i < N; i++)
+          g.nodes.push({
+            id: "n" + i,
+            label: "W" + i,
+            x: Math.random(),
+            y: Math.random(),
+            size: 1,
+            color: "#666",
+          });
+
+        s = new sigma({
+          graph: g,
+          renderer: {
+            container: "sigma-container",
+            type: "canvas",
+          },
+          settings: {
+            edgeLabelSize: "proportional",
+            defaultLabelSize: 15,
+            defaultEdgeLabelSize: 15,
+          },
+        });
+        var visited = [];
+        var stos = [];
+        spj = false;
+        // SPOJNOSC
+        var dict = new Object();
+        s.graph.nodes().forEach((element) => {
+          dict[element.id] = [];
+        });
+        s.graph.edges().forEach((element) => {
+          dict[element.source].push(element.target);
+          dict[element.target].push(element.source);
+        });
+        visited.push(s.graph.nodes()[0].id);
+        spoj(s.graph.nodes()[0].id);
+        function spoj(w) {
+          if (dict[w].length !== 0) {
+            var arrS = dict[w].filter(function (obj) {
+              return visited.indexOf(obj) == -1;
+            });
+            arr3 = arrS.filter(function (obj) {
+              return stos.indexOf(obj) == -1;
+            });
+            if (arr3.length !== 0) {
+              for (let i = 0; i < s.graph.edges().length; i++) {
+                if (
+                  s.graph.edges()[i].source === w &&
+                  s.graph.edges()[i].target === arr3[0]
+                ) {
+                  const index = dict[w].indexOf(arr3[0]);
+                  if (index > -1) {
+                    dict[w].splice(index, 1);
+                  }
+
+                  const indexx = dict[arr3[0]].indexOf(w);
+                  if (index > -1) {
+                    dict[arr3[0]].splice(indexx, 1);
+                  }
+                  visited.push(arr3[0]);
+
+                  s.graph.dropEdge(s.graph.edges()[i].id);
+
+                  spoj(arr3[0]);
+                } else if (
+                  s.graph.edges()[i].source === arr3[0] &&
+                  s.graph.edges()[i].target === w
+                ) {
+                  const index = dict[w].indexOf(arr3[0]);
+                  if (index > -1) {
+                    dict[w].splice(index, 1);
+                  }
+                  const indexx = dict[arr3[0]].indexOf(w);
+                  if (index > -1) {
+                    dict[arr3[0]].splice(indexx, 1);
+                  }
+                  visited.push(arr3[0]);
+
+                  s.graph.dropEdge(s.graph.edges()[i].id);
+
+                  spoj(arr3[0]);
+                }
+              }
+            } else {
+              var popped = visited.pop();
+              if (popped !== undefined) {
+                stos.push(popped);
+                spoj(popped);
+              }
+            }
+          } else {
+            var popped = visited.pop();
+            if (popped !== undefined) {
+              stos.push(popped);
+              spoj(popped);
+            }
+          }
+        }
+        if (stos.length === s.graph.nodes().length) spj = true;
+
+        // EULER
+        s.kill();
+        visited = [];
+        stos = [];
+        dict = {};
+        s = new sigma({
+          graph: g,
+          renderer: {
+            container: "sigma-container",
+            type: "canvas",
+          },
+          settings: {
+            edgeLabelSize: "proportional",
+            defaultLabelSize: 15,
+            defaultEdgeLabelSize: 15,
+          },
+        });
+        if (spj) {
+          var eul = true;
+          s.graph.nodes().forEach((e) => {
+            if (s.graph.degree(e.id) % 2 !== 0) {
+              eul = false;
+            }
+          });
+          if (eul === false) {
+            console.log("Nie ma cyklu Eulera");
+          } else {
+            var dict = new Object();
+            s.graph.nodes().forEach((element) => {
+              dict[element.id] = [];
+            });
+            s.graph.edges().forEach((element) => {
+              dict[element.source].push(element.target);
+              dict[element.target].push(element.source);
+            });
+            visited.push(s.graph.nodes()[0].id);
+            dfs(s.graph.nodes()[0].id);
+            function dfs(w) {
+              if (dict[w].length !== 0) {
+                var arr3 = dict[w].filter(function (obj) {
+                  return visited.indexOf(obj) == -1;
+                });
+
+                if (arr3.length !== 0) {
+                  for (let i = 0; i < s.graph.edges().length; i++) {
+                    var arrnum = [];
+                    arr3.forEach((element) => {
+                      arrnum.push(element.slice(1, 2));
+                    });
+                    arrnum.sort(function (a, b) {
+                      return a - b;
+                    });
+                    most = true;
+                    while (most) {
+                      for (let i = 0; i < arrnum.length; i++) {
+                        if (dict[`n${arrnum[i]}`].length > 1) {
+                          most = false;
+                          var mini = `n${arrnum[i]}`;
+                          break;
+                        } else {
+                          var mini = `n${arrnum[i]}`;
+                        }
+                      }
+                      most = false;
+                    }
+
+                    if (
+                      s.graph.edges()[i].source === w &&
+                      s.graph.edges()[i].target == mini
+                    ) {
+                      const index = dict[w].indexOf(mini);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[mini].indexOf(w);
+                      if (index > -1) {
+                        dict[mini].splice(indexx, 1);
+                      }
+                      visited.push(mini);
+
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+
+                      dfs(mini);
+                    } else if (
+                      s.graph.edges()[i].source === mini &&
+                      s.graph.edges()[i].target === w
+                    ) {
+                      const index = dict[w].indexOf(mini);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+                      const indexx = dict[mini].indexOf(w);
+                      if (index > -1) {
+                        dict[mini].splice(indexx, 1);
+                      }
+                      visited.push(mini);
+
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+
+                      dfs(mini);
+                    }
+                  }
+                } else {
+                  var arrnum = [];
+                  dict[w].forEach((element) => {
+                    arrnum.push(element.slice(1, 2));
+                  });
+                  arrnum.sort(function (a, b) {
+                    return a - b;
+                  });
+                  most = true;
+                  while (most) {
+                    for (let i = 0; i < arrnum.length; i++) {
+                      if (dict[`n${arrnum[i]}`].length > 1) {
+                        most = false;
+                        var minz = `n${arrnum[i]}`;
+                        break;
+                      } else {
+                        var minz = `n${arrnum[i]}`;
+                      }
+                    }
+                    most = false;
+                  }
+
+                  for (let i = 0; i < s.graph.edges().length; i++) {
+                    if (
+                      s.graph.edges()[i].source === w &&
+                      s.graph.edges()[i].target === minz
+                    ) {
+                      const index = dict[w].indexOf(minz);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[minz].indexOf(w);
+                      if (index > -1) {
+                        dict[minz].splice(indexx, 1);
+                      }
+                      pops = minz;
+                      visited.push(minz);
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+                      dfs(pops);
+                    } else if (
+                      s.graph.edges()[i].source === minz &&
+                      s.graph.edges()[i].target === w
+                    ) {
+                      const index = dict[w].indexOf(minz);
+                      if (index > -1) {
+                        dict[w].splice(index, 1);
+                      }
+
+                      const indexx = dict[minz].indexOf(w);
+                      if (index > -1) {
+                        dict[minz].splice(indexx, 1);
+                      }
+                      pops = minz;
+                      visited.push(minz);
+                      s.graph.dropEdge(s.graph.edges()[i].id);
+                      dfs(pops);
+                    }
+                  }
+                }
+              } else {
+                var popped = visited.pop();
+                if (popped !== undefined) {
+                  stos.push(popped);
+                  dfs(popped);
+                } else {
+                  console.log(stos);
+                }
+              }
+            }
+          }
+          console.log("cykl Eulera " + stos);
+        } else {
+          console.log("Graf nie jest spojny");
+        }
+      }
+    </script>
+  </body>
+</html>
